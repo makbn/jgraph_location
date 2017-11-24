@@ -31,7 +31,13 @@ public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
 
     public boolean createEdge(V src,V dst){
         if(vertices.contains(src) && vertices.contains(dst)){
+
             PathEdge<V> pe=new PathEdge<V>(src,dst);
+            if(edges.contains(pe)){
+                pe=edges.get(edges.indexOf(pe));
+                pe.setWeight(pe.getWeight()+1);
+                return false;
+            }
             return edges.add(pe);
         }
 
@@ -45,5 +51,12 @@ public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
 
     public ArrayList<PathEdge<V>> getEdges() {
         return edges;
+    }
+
+
+    public void print(){
+        for(PathEdge p:edges){
+            p.print();
+        }
     }
 }

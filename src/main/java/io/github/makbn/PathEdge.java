@@ -16,6 +16,7 @@ public class PathEdge<V extends LocationVertex> {
 
     protected V vertexDst;
 
+
     public PathEdge(V src,V dst,int w,boolean isDirected){
         this.vertexSrc=src;
         this.vertexDst=dst;
@@ -43,5 +44,34 @@ public class PathEdge<V extends LocationVertex> {
     public V getVertexDst()
     {
         return vertexDst;
+    }
+
+    public int getWeight()
+    {
+        return weight;
+    }
+
+    public void setWeight(int weight)
+    {
+        this.weight = weight;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(obj instanceof PathEdge){
+            if(this.vertexSrc.getLat()==((PathEdge) obj).getVertexSrc().getLat() &&
+                this.vertexSrc.getLon()==((PathEdge) obj).getVertexSrc().getLon() &&
+                this.vertexDst.getLat()==((PathEdge) obj).getVertexDst().getLat() &&
+                this.vertexDst.getLon()== ((PathEdge) obj).getVertexDst().getLon()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void print()
+    {
+        System.out.println("SRC: "+vertexSrc.toString() + "\t DST: "+vertexDst.toString()+"\t W: "+weight);
     }
 }

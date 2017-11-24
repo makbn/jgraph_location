@@ -96,4 +96,9 @@ public class LocationVertex{
     public void setDelivered(boolean delivered) {
         this.delivered = delivered;
     }
+
+    public String toString()
+    {
+        return ("[lat:"+lat+"\tlon:"+lon);
+    }
 }

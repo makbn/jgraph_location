@@ -46,7 +46,7 @@ public class GraphFactory {
             LocationVertex lv=new LocationVertex(id++, lat,lon, date, time,1,pCity,false);
             vertices.add(lv);
             lg.addVertex(lv);
-            System.out.println("lat: "+lat+" \t\t\t\t lon: "+lon+ " \t\t\t\t date: "+date+" \t\t time: "+time);
+            //System.out.println("lat: "+lat+" \t\t\t\t lon: "+lon+ " \t\t\t\t date: "+date+" \t\t time: "+time);
         }
 
         ArrayList<PathEdge> pathEdges=new ArrayList<PathEdge>();
@@ -58,6 +58,8 @@ public class GraphFactory {
             pathEdges.add(pe);
             lg.createEdge(src,dst);
         }
+
+        lg.print();
 
         return lg;
     }
