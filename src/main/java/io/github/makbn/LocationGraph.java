@@ -1,7 +1,6 @@
 package io.github.makbn;
 
 import org.jgrapht.WeightedGraph;
-import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
 import java.util.ArrayList;
 
@@ -9,6 +8,10 @@ import java.util.ArrayList;
 public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
     private ArrayList<V> vertices;
     private ArrayList<PathEdge<V>> edges;
+    private int maxWeight=0;
+    private int maxTraffic=0;
+    private String verticesCSV =null;
+    private String edgeCSV =null;
 
     public LocationGraph(Class<? extends E> edgeClass) {
         //super(edgeClass);
@@ -25,23 +28,49 @@ public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
 
     //@Override
     public boolean addVertex(V v) {
+        for (int i=0;i<vertices.size();i++){
+            if(vertices.get(i).getCityId()==v.getCityId()) {
+               return false;
+            }
+        }
         vertices.add(v);
         return true;
     }
 
-    public boolean createEdge(V src,V dst){
-        if(vertices.contains(src) && vertices.contains(dst)){
+    public LocationVertex findByPName(String name){
+        for (int i=0;i<vertices.size();i++){
+            if(vertices.get(i).getpCity().equals(name)) {
+                vertices.get(i);
+            }
+        }
+        return null;
+    }
 
+    public LocationVertex findById(int id){
+        for (int i=0;i<vertices.size();i++){
+            if(vertices.get(i).getCityId()==id) {
+                return vertices.get(i);
+            }
+        }
+        return null;
+    }
+
+    public PathEdge<V> createEdge(V src,V dst){
+        if(vertices.contains(src) && vertices.contains(dst)){
+            src=vertices.get(vertices.indexOf(src));
+            dst=vertices.get(vertices.indexOf(dst));
             PathEdge<V> pe=new PathEdge<V>(src,dst);
             if(edges.contains(pe)){
                 pe=edges.get(edges.indexOf(pe));
                 pe.setWeight(pe.getWeight()+1);
-                return false;
+                if(pe.getWeight()>maxWeight)
+                    maxWeight=pe.getWeight();
+            }else {
+                edges.add(pe);
             }
-            return edges.add(pe);
+            return pe;
         }
-
-        return false;
+        return null;
     }
 
 
@@ -57,6 +86,50 @@ public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
     public void print(){
         for(PathEdge p:edges){
             p.print();
+        }
+    }
+
+    public String getVerticesCSV() {
+        if(verticesCSV ==null)
+            createVerticesCSV();
+        return verticesCSV;
+    }
+
+    public String getEdgeCSV(){
+        if(edgeCSV==null)
+            createEdgeCSV();
+        return edgeCSV;
+    }
+
+    private void createEdgeCSV() {
+        edgeCSV="";
+        for (PathEdge p:edges){
+            if(p!=null)
+                edgeCSV=edgeCSV.concat(p.getCSV()+"\n");
+        }
+    }
+
+    private void createVerticesCSV() {
+        verticesCSV ="";
+        for(LocationVertex vertex:vertices){
+            if(vertex!=null)
+                verticesCSV = verticesCSV.concat(vertex.getCSV()+"\n");
+        }
+    }
+
+
+    public int getMaxWeight() {
+        return maxWeight;
+    }
+
+    public int getMaxTraffic(){
+        return maxTraffic;
+    }
+
+    public void updateMaxTraffic(){
+        for(LocationVertex v:vertices){
+            if(v.getInputTraffic()+v.getInputTraffic()>maxTraffic)
+                maxTraffic=v.getInputTraffic()+v.getInputTraffic();
         }
     }
 }

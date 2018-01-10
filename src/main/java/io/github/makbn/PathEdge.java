@@ -60,6 +60,8 @@ public class PathEdge<V extends LocationVertex> {
     public boolean equals(Object obj)
     {
         if(obj instanceof PathEdge){
+            if(this.vertexDst.equals(((PathEdge) obj).vertexDst) && this.vertexSrc.equals(((PathEdge) obj).vertexSrc))
+                return true;
             if(this.vertexSrc.getLat()==((PathEdge) obj).getVertexSrc().getLat() &&
                 this.vertexSrc.getLon()==((PathEdge) obj).getVertexSrc().getLon() &&
                 this.vertexDst.getLat()==((PathEdge) obj).getVertexDst().getLat() &&
@@ -73,5 +75,12 @@ public class PathEdge<V extends LocationVertex> {
     public void print()
     {
         System.out.println("SRC: "+vertexSrc.toString() + "\t DST: "+vertexDst.toString()+"\t W: "+weight);
+    }
+
+    public String getCSV() {
+        return  this.vertexSrc.getCityId()+","+
+        this.vertexDst.getCityId()+","+
+        this.weight+","+
+        this.isDirected+",";
     }
 }
