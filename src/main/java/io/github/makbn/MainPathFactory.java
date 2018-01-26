@@ -4,139 +4,165 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.awt.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class MainPathFactory {
 
-    private static HashMap<String, double[]> geos;
 
-    public static ArrayList<DirectedPath> readFromExcel (LocationGraph lg, String filePath,String runningPath) throws IOException
 
-    {
+    public static ArrayList<DirectedPath> mainPath(String filePath) throws IOException {
         ArrayList<DirectedPath> directedPaths=new ArrayList<DirectedPath>();
         InputStream ExcelFileToRead = new FileInputStream(filePath);
         HSSFWorkbook wb = new HSSFWorkbook(ExcelFileToRead);
-
         HSSFSheet sheet=wb.getSheetAt(0);
         HSSFRow row;
         HSSFCell cell;
-
         Iterator rows = sheet.rowIterator();
-        int rowIndex=0;
 
-        while (rows.hasNext())
-        {
-            if(rowIndex<4) {
-                rowIndex++;
-                row=(HSSFRow) rows.next();
-                continue;
-
-            }else {
-                row=(HSSFRow) rows.next();
+        for(int rowIndex=0;rows.hasNext();rowIndex++){
+            row=(HSSFRow) rows.next();
+            if(rowIndex>=4) {
                 Iterator cells = row.cellIterator();
-                int colIndex=0;
                 String first=null,last=null;
                 ArrayList<String> middle=new ArrayList<String>();
-                while (cells.hasNext())
-                {
+                for (int colIndex=0;cells.hasNext();colIndex++) {
                     cell=(HSSFCell) cells.next();
                     if(colIndex==1 || colIndex==5) {
-                        if(cell.getStringCellValue()==null || cell.getStringCellValue().isEmpty()){
+                        if(cell.getStringCellValue()==null || cell.getStringCellValue().isEmpty())
                             continue;
-                        }
                         String[] cities=cell.getStringCellValue().trim().split("-");
                         if(colIndex==1) {
                             first = cities[0].trim();
                             last = cities[1].trim();
-                        }else{
-                            for(int i=0;i<cities.length;i++){
+                        }else
+                            for(int i=0;i<cities.length;i++)
                                 middle.add(cities[i].trim());
-                            }
-                        }
-
-
                     }
-
-                    colIndex++;
                 }
                 if(first==null)
                     continue;
                 ArrayList<LocationVertex> locationVertices=new ArrayList<LocationVertex>();
-
                 ArrayList<String> pNames=new ArrayList<String>();
                 pNames.add(first);
-
-                for(String s:middle){
-                    pNames.add(s);
-                }
+                for(int i=middle.size()-1;i>=0;i--)
+                    pNames.add(middle.get(i));
                 pNames.add(last);
-
                 for(String s:pNames){
-                    LocationVertex vertex=lg.findByPName(s);
-                    if(vertex==null){
-                        double[] geo=getGeo(s,runningPath);
-                        if(geo==null)
-                            continue;
-                        double lat=geo[0];
-                        double lon=geo[1];
-                        vertex=new LocationVertex(((rowIndex+1)*100)+(colIndex+1),lat,lon,null,null,-1,s,false);
-                    }
+                    LocationVertex vertex=Utils.findLocationVertexByName(s);
                     if(vertex!=null)
                         locationVertices.add(vertex);
                 }
-                directedPaths.add(new DirectedPath(locationVertices));
-                rowIndex++;
+                DirectedPath directedPath=new DirectedPath(locationVertices);
+                directedPath.setColor(Color.black);
+                directedPath.setStroke(new BasicStroke(2));
+                directedPaths.add(directedPath);
             }
-
         }
         return directedPaths;
 
     }
 
-    private static double[] getGeo(String pCity,String runningPath){
-        if(geos==null){
-            geos=getGeo(runningPath);
-        }
-        return geos.get(pCity);
-    }
-    @SuppressWarnings("Duplicates")
-    private static HashMap<String,double[]> getGeo(String runningPth) {
+    public static HashMap<DirectedPath.PathType,ArrayList<DirectedPath>> airAndRailWay(String filePath) throws IOException {
+        HashMap<DirectedPath.PathType,ArrayList<DirectedPath>> directedPaths=new HashMap<DirectedPath.PathType, ArrayList<DirectedPath>>();
+        directedPaths.put(DirectedPath.PathType.railway,new ArrayList<DirectedPath>());
+        directedPaths.put(DirectedPath.PathType.airline,new ArrayList<DirectedPath>());
+        InputStream ExcelFileToRead = new FileInputStream(filePath);
+        HSSFWorkbook wb = new HSSFWorkbook(ExcelFileToRead);
+        HSSFSheet sheet=wb.getSheetAt(0);
+        HSSFRow row;
+        HSSFCell cell;
+        Iterator rows = sheet.rowIterator();
+        for( int rowIndex=0;rows.hasNext(); rowIndex++) {
+            row=(HSSFRow) rows.next();
+            if(rowIndex>=1) {
+                Iterator cells = row.cellIterator();
+                String src=null;
+                String dst=null;
+                String[] airlineName=null;
+                boolean isAirline=false;
+                boolean isRailway=false;
+                for (int colIndex=0;cells.hasNext(); colIndex++) {
+                    cell=(HSSFCell) cells.next();
+                    if(colIndex==1) {
+                        String[] cities=cell.getStringCellValue().trim().split("-");
+                        src = cities[0].trim();
+                        dst = cities[1].trim();
+                    }else if(colIndex==3) {
+                        int value = (int) cell.getNumericCellValue();
+                        isRailway = value == 1;
+                    }else if(colIndex==4) {
+                        int value = (int) cell.getNumericCellValue();
+                        isAirline= value==1;
+                    }else if(colIndex==5){
+                        airlineName=cell.getStringCellValue().trim().split("-");
+                    }
+                }
+                if(src==null || dst==null)
+                    continue;
+                ArrayList<LocationVertex> locationVertices=new ArrayList<LocationVertex>();
 
-        JSONParser parser = new JSONParser();
-        HashMap<String,double[]> geos=new HashMap<String, double[]>();
-        try
-        {
+                ArrayList<String> pNames=new ArrayList<String>();
+                pNames.add(src);
+                pNames.add(dst);
 
-            Object obj = parser.parse(new FileReader(runningPth+"/data/city.json"));
+                for(String s:pNames){
+                    LocationVertex vertex=Utils.findLocationVertexByName(s);
+                    if(vertex!=null)
+                        locationVertices.add(vertex);
+                }
+                if(isRailway) {
+                    directedPaths.get(DirectedPath.PathType.railway).add(createDirectedPath(locationVertices,
+                            new BasicStroke(4),
+                            new Color(185,122,87,160),
+                            DirectedPath.PathType.railway,
+                            null));
+                }
+                if(isAirline){
+                    for(String airline:airlineName){
+                        Color color=null;
+                        BasicStroke stroke=null;
+                        if (airline.equals("iran air")) {
+                            color =  new Color(0, 255, 255,160);
+                            stroke=new BasicStroke(5);
+                        } else if (airline.equals("ata")) {
+                            color = new Color(255, 0, 255,160);
+                            stroke=new BasicStroke(4);
+                        } else if (airline.equals("mahan")) {
+                            color = new Color(255, 0, 0,160);
+                            stroke=new BasicStroke(3);
+                        } else if (airline.equals("taban")) {
+                            color = new Color(0, 255, 0,160);
+                            stroke=new BasicStroke(2);
+                        }
 
-            JSONObject jsonObject = (JSONObject) obj;
-
-            JSONArray records= (JSONArray) jsonObject.get("RECORDS");
-
-            for(int i=0;i<records.size();i++){
-                JSONObject city= (JSONObject) records.get(i);
-                String name= (String) city.get("name");
-                name=name.substring(1,name.length());
-                double[] latlon=new double[2];
-                latlon[0]= (Double) city.get("latitude");
-                latlon[1]= (Double) city.get("longitude");
-                geos.put(name,latlon);
+                        directedPaths.get(DirectedPath.PathType.airline).add(createDirectedPath(locationVertices,
+                                stroke,
+                                color,
+                                DirectedPath.PathType.airline,
+                                airline));
+                    }
+                }
+                rowIndex++;
             }
 
-
-        }catch (Exception e){
-            e.printStackTrace();
         }
-        return geos;
+        return directedPaths;
     }
+
+
+    private static DirectedPath createDirectedPath(ArrayList<LocationVertex> locationVertices ,BasicStroke stroke, Color color, DirectedPath.PathType type,String name){
+        DirectedPath directedPath=new DirectedPath(locationVertices);
+        directedPath.setType(type);
+        directedPath.setColor(color);
+        directedPath.setStroke(stroke);
+        directedPath.setAdditionalName(name);
+        return directedPath;
+    }
+
 }

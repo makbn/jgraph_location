@@ -39,8 +39,25 @@ public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
 
     public LocationVertex findByPName(String name){
         for (int i=0;i<vertices.size();i++){
-            if(vertices.get(i).getpCity().equals(name)) {
-                vertices.get(i);
+            String pc=vertices.get(i).getpCity();
+            if(pc.equals(name)) {
+                return vertices.get(i);
+            }else if(pc.trim().equals(name.trim())){
+                return vertices.get(i);
+            }
+            if(name.contains("ی")){
+                pc=pc.replaceAll("ي","ی");
+                name=name.replaceAll("ي","ی");
+                if(pc.equals(name)){
+                    return vertices.get(i);
+                }
+            }
+            if(name.contains("ک")){
+                pc=pc.replaceAll("ك","ک");
+                name=name.replaceAll("ك","ک");
+                if(pc.equals(name)){
+                    return vertices.get(i);
+                }
             }
         }
         return null;

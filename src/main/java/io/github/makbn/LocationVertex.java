@@ -19,6 +19,7 @@ public class LocationVertex{
     private int postManId;
 
     private String pCity;
+    private String eCity;
 
     private boolean delivered=false;
 
