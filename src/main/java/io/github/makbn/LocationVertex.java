@@ -20,6 +20,8 @@ public class LocationVertex{
 
     private String pCity;
     private String eCity;
+    private String eState;
+    private String pState;
 
     private boolean delivered=false;
 
@@ -28,6 +30,7 @@ public class LocationVertex{
     private int eventId;
 
     private int cityId;
+    private int stateId;
 
     private int inputTraffic;
     private int outputTraffic;
@@ -44,15 +47,16 @@ public class LocationVertex{
     }
 
     public LocationVertex(int id, double lat, double lon, String date, String time, int postManId, String pCity, boolean delivered,int cityID) {
-        this.id = id;
-        this.lat = lat;
-        this.lon = lon;
-        this.date = date;
-        this.time = time;
-        this.postManId = postManId;
-        this.pCity = pCity;
-        this.delivered = delivered;
+        this(id,lat,lon,date,time,postManId,pCity,delivered);
         this.cityId=cityID;
+    }
+
+    public LocationVertex(int id, double lat, double lon, String date, String time, int postManId, String pCity, boolean delivered,int cityId,String pState,String eState,int stateId ) {
+        this(id,lat,lon,date,time,postManId,pCity,delivered);
+        this.eState = eState;
+        this.pState = pState;
+        this.cityId = cityId;
+        this.stateId = stateId;
     }
 
     public static LocationVertex getLocationVertex(String csv){
@@ -65,7 +69,10 @@ public class LocationVertex{
                 Integer.parseInt(param[5].trim()),
                 new String( param[6].trim().getBytes( Charset.forName("UTF-8" )), Charset.forName("UTF-8") ),
                 Boolean.valueOf(param[7].trim()),
-                Integer.parseInt(param[8].trim())
+                Integer.parseInt(param[8].trim()),
+                param[9].trim(),
+                param[10].trim(),
+                Integer.parseInt( param[11].trim())
                 );
     }
 
@@ -196,9 +203,45 @@ public class LocationVertex{
                 this.postManId+","+
                 this.pCity+","+
                 this.delivered+","+
-                this.cityId;
+                this.cityId+","+
+                this.pState+","+
+                this.eState+","+
+                this.stateId;
         return csvLine;
     }
+
+    public String geteCity() {
+        return eCity;
+    }
+
+    public void seteCity(String eCity) {
+        this.eCity = eCity;
+    }
+
+    public String geteState() {
+        return eState;
+    }
+
+    public void seteState(String eState) {
+        this.eState = eState;
+    }
+
+    public String getpState() {
+        return pState;
+    }
+
+    public void setpState(String pState) {
+        this.pState = pState;
+    }
+
+    public int getStateId() {
+        return stateId;
+    }
+
+    public void setStateId(int stateId) {
+        this.stateId = stateId;
+    }
+
     @Override
     public boolean equals(Object obj)
     {

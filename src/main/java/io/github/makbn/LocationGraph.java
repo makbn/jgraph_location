@@ -3,11 +3,14 @@ package io.github.makbn;
 import org.jgrapht.WeightedGraph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
     private ArrayList<V> vertices;
     private ArrayList<PathEdge<V>> edges;
+    private HashMap<String,Integer> stateInputTraffic;
+    private HashMap<String,Integer> stateOutputTraffic;
     private int maxWeight=0;
     private int maxTraffic=0;
     private String verticesCSV =null;
@@ -17,6 +20,8 @@ public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
         //super(edgeClass);
         this.vertices=new ArrayList<V>();
         this.edges=new ArrayList<PathEdge<V>>();
+        this.stateInputTraffic=new HashMap<String, Integer>();
+        this.stateOutputTraffic=new HashMap<String, Integer>();
     }
 
     public LocationGraph(WeightedGraph<V, E> base) {
@@ -61,6 +66,39 @@ public class LocationGraph<V extends LocationVertex, E extends PathEdge<V>> {
             }
         }
         return null;
+    }
+
+    public void addToStateInputTraffic(String name,int value){
+        if(stateInputTraffic.containsKey(name)){
+            int currentValue=stateInputTraffic.get(name);
+            stateInputTraffic.put(name,value+currentValue);
+        }else {
+            stateInputTraffic.put(name,value);
+        }
+    }
+
+    public void addToStateoutputTraffic(String name,int value){
+        if(stateOutputTraffic.containsKey(name)){
+            int currentValue=stateOutputTraffic.get(name);
+            stateOutputTraffic.put(name,value+currentValue);
+        }else {
+            stateOutputTraffic.put(name,value);
+        }
+    }
+    public HashMap<String, Integer> getStateInputTraffic() {
+        return stateInputTraffic;
+    }
+
+    public void setStateInputTraffic(HashMap<String, Integer> stateInputTraffic) {
+        this.stateInputTraffic = stateInputTraffic;
+    }
+
+    public HashMap<String, Integer> getStateOutputTraffic() {
+        return stateOutputTraffic;
+    }
+
+    public void setStateOutputTraffic(HashMap<String, Integer> stateOutputTraffic) {
+        this.stateOutputTraffic = stateOutputTraffic;
     }
 
     public LocationVertex findById(int id){

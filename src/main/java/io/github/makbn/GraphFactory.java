@@ -23,7 +23,7 @@ public class GraphFactory {
     public static LocationGraph createFromSQL(String host,String dbName,String username,String password,String cityId,String postmanId,String date,String orderTableName,String runningPath) throws SQLException, ClassNotFoundException {
         SqlHelper.init(SqlHelper.DBRM.MS_SQL_SERVER,host,dbName,username,password);
         // String query="SELECT LE_DATEDELIVERED, LE_TIMEDELIVERED, LE_LAT, LE_LON, LE_LETTER_ID, PCity FROM TBL_Letter WHERE LE_POSTMAN_ID={POSTMAN_ID} AND LE_DATEDELIVERED ='{DATA_DELIVERED}' AND CityID={CITY_ID} ORDER BY LE_DATEDELIVERED , LE_TIMEDELIVERED";
-        String query="select * from Full_Exchange order by ParcelCode , EventDate ";
+        String query="select * from Full_Exchange2 order by ParcelCode , EventDate ";
 
         //query=query.replace("{POSTMAN_ID}",postmanId).replace("{CITY_ID}",cityId).replace("{ORDER_TABLE}",orderTableName).replace("{DATA_DELIVERED}",date);
 
@@ -54,6 +54,10 @@ public class GraphFactory {
             String pCity=resultSet.getString("PCity");
             int cityId=resultSet.getInt("CityID");
             int event=resultSet.getInt("EventID");
+           // int stateId=resultSet.getInt("stateID");
+            int stateId=-1;
+            String pState=resultSet.getString("pState");
+            String eState=resultSet.getString("eState");
             double[] geo=Utils.getGeo(pCity);
             if(geo==null) {
                 notFound.add(pCity);
@@ -63,8 +67,7 @@ public class GraphFactory {
             double lon=geo[1];
             String date=resultSet.getString("EventDate");
 
-            LocationVertex currentVertex=new LocationVertex(id++,lat,lon,date,null,-1,pCity,false);
-            currentVertex.setCityId(cityId);
+            LocationVertex currentVertex=new LocationVertex(id++,lat,lon,date,null,-1,pCity,false,cityId,pState,eState,stateId);
             currentVertex.setEventId(event);
             currentVertex.setPostNodeId(postNodeId);
             lg.addVertex(currentVertex);
